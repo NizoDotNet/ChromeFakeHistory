@@ -1,9 +1,5 @@
-﻿using System.Diagnostics;
-using System.Data.SQLite;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Data.SqlClient;
-using System.Security.Policy;
-using System;
+﻿using System.Data.SQLite;
+using System.Diagnostics;
 namespace FakeHistory;
 
 public class ChromeHistory
@@ -15,12 +11,6 @@ public class ChromeHistory
     public ChromeHistory()
     {
 
-    }
-
-    public int MasterControl()
-    {
-
-        return 0;
     }
 
     public int AddHistory(string url, string title, DateTime date)
@@ -36,8 +26,6 @@ public class ChromeHistory
 
         AddToVisit(sqlConnection, id, lastVisitTime);
 
-        sqlConnection.Close();
-        sqlConnection.Dispose();
         return id;
     }
 
@@ -84,7 +72,7 @@ public class ChromeHistory
         using var addToVisits = sqlConnection.CreateCommand();
         addToVisits.CommandText = """
                         INSERT INTO visits(url, visit_time, transition, visit_duration, is_known_to_sync) 
-                        VALUES(@id, @lastVisitTime, 805306368, 41096701, 1);
+                        VALUES(@id, @lastVisitTime, 805306368, 41096701, 0);
                         """;
         addToVisits.Parameters.AddWithValue("id", id);
         addToVisits.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
