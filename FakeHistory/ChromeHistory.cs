@@ -1,5 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Data.SQLite;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Data.SqlClient;
+using System.Security.Policy;
+using System;
 namespace FakeHistory;
 
 public class ChromeHistory
@@ -13,13 +17,38 @@ public class ChromeHistory
 
     }
 
+    public int MasterControl()
+    {
+
+        return 0;
+    }
+
     public int AddHistory(string url, string title, DateTime date)
     {
         CloseChrome();
 
-        using SQLiteConnection sqlConnection = new(connectionString);
+        using SQLiteConnection sqlConnection = CreateConnection();
         sqlConnection.Open();
 
+        var lastVisitTime = AddUrl(sqlConnection, url, title, date);
+
+        int id = GetId(sqlConnection, url, title);
+
+        AddToVisit(sqlConnection, id, lastVisitTime);
+
+        sqlConnection.Close();
+        sqlConnection.Dispose();
+        return id;
+    }
+
+    private SQLiteConnection CreateConnection()
+    {
+        SQLiteConnection sqlConnection = new(connectionString);
+        return sqlConnection;
+    }
+
+    private long AddUrl(SQLiteConnection sqlConnection, string url, string title, DateTime date)
+    {
         using var addUrl = sqlConnection.CreateCommand();
         addUrl.CommandText = """
             INSERT INTO urls(url, title, visit_count, last_visit_time) 
@@ -34,6 +63,11 @@ public class ChromeHistory
         addUrl.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
         addUrl.ExecuteNonQuery();
 
+        return lastVisitTime;
+    }
+
+    private int GetId(SQLiteConnection sqlConnection, string url, string title)
+    {
         using var getUrlId = sqlConnection.CreateCommand();
         getUrlId.CommandText = "SELECT id FROM urls WHERE title == @title AND url == @url";
         getUrlId.Parameters.AddWithValue("title", title);
@@ -42,6 +76,11 @@ public class ChromeHistory
         idReader.Read();
         int id = idReader.GetInt32(0);
 
+        return id;
+    }
+
+    private void AddToVisit(SQLiteConnection sqlConnection, int id, long lastVisitTime)
+    {
         using var addToVisits = sqlConnection.CreateCommand();
         addToVisits.CommandText = """
                         INSERT INTO visits(url, visit_time, transition, visit_duration, is_known_to_sync) 
@@ -49,12 +88,8 @@ public class ChromeHistory
                         """;
         addToVisits.Parameters.AddWithValue("id", id);
         addToVisits.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
-
         addToVisits.ExecuteNonQuery();
-        return id;
     }
-
-
     private void CloseChrome()
     {
         Process[] chromeInstances = Process.GetProcessesByName("chrome");
