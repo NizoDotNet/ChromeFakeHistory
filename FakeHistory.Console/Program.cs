@@ -2,7 +2,7 @@
 
 ChromeHistory chromeHistory = new();
 
-chromeHistory.AddHistory("https://x.com", "new", DateTime.UtcNow);
+chromeHistory.AddHistory("https://www.youtube.com", "old", new(2024, 2, 23));
 
 Console.WriteLine("End");
 
