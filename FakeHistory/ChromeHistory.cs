@@ -1,5 +1,8 @@
 ﻿using System.Data.SQLite;
 using System.Diagnostics;
+using System.Dynamic;
+
+
 namespace FakeHistory;
 
 public class ChromeHistory
@@ -8,10 +11,19 @@ public class ChromeHistory
         "Google\\Chrome\\User Data\\Default\\History");
     private static string connectionString = $"Data Source={localAppDataPath}";
 
-    public ChromeHistory()
-    {
 
+    public void AddHistory(string[] url, string[] title)
+    {
+        CloseChrome();
+
+        using SQLiteConnection sqlConnection = CreateConnection();
+        sqlConnection.Open();
+
+        
     }
+
+
+
 
     public int AddHistory(string url, string title, DateTime date)
     {
@@ -43,14 +55,21 @@ public class ChromeHistory
             VALUES (@url, @title, 32, @lastVisitTime);
             """;
 
-        var m = new DateTime(1601, 1, 1);
-        var dif = date - m;
-        var lastVisitTime = dif.Ticks / (TimeSpan.TicksPerMillisecond / 1000);
+        var lastVisitTime = GetMilliSeconds(date);
+
         addUrl.Parameters.AddWithValue("url", url);
         addUrl.Parameters.AddWithValue("title", title);
         addUrl.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
         addUrl.ExecuteNonQuery();
 
+        return lastVisitTime;
+    }
+
+    private long GetMilliSeconds(DateTime date)
+    {
+        var m = new DateTime(1601, 1, 1);
+        var dif = date - m;
+        var lastVisitTime = dif.Ticks / (TimeSpan.TicksPerMillisecond / 1000);
         return lastVisitTime;
     }
 

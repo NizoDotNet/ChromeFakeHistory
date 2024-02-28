@@ -2,7 +2,11 @@
 
 ChromeHistory chromeHistory = new();
 
-chromeHistory.AddHistory("https://www.youtube.com", "qq", new(2024, 2, 27, 19, 34, 32));
+string url = Console.ReadLine();
+string title = Console.ReadLine();
+DateTime date = DateTime.Parse(Console.ReadLine());
+
+chromeHistory.AddHistory($"https://{url}", title, date);
 
 Console.WriteLine("End");
 
