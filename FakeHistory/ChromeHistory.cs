@@ -11,17 +11,33 @@ public class ChromeHistory
         "Google\\Chrome\\User Data\\Default\\History");
     private static string connectionString = $"Data Source={localAppDataPath}";
 
+    public void AddHistory(string[] urls, string[] titles)
+    {
+        CloseChrome();
 
-    /*    public void AddHistory(string[] url, string[] title)
+        using SQLiteConnection sqlConnection = CreateConnection();
+        sqlConnection.Open();
+
+        UrlOrTitleLengthLessThanAnotherException.ValidateUrlAndTitle(urls, titles);
+
+        for (int i = 0; i < urls.Length; i++)
         {
-            CloseChrome();
+            AddHistory(sqlConnection, new UrlModel(urls[i], titles[i]));
+        }
+    }
+    public void AddHistory(string[] urls, string[] titles, DateTime[] dates)
+    {
+        CloseChrome();
 
-            using SQLiteConnection sqlConnection = CreateConnection();
-            sqlConnection.Open();
+        using SQLiteConnection sqlConnection = CreateConnection();
+        sqlConnection.Open();
 
+        UrlOrTitleLengthLessThanAnotherException.ValidateUrlAndTitle(urls, titles, dates);
 
-        }*/
-
+        for (int i = 0; i < urls.Length; i++)
+            AddHistory(sqlConnection, new UrlModel(urls[i], titles[i], dates[i]));
+        
+    }
 
     public void AddHistory(string url, string title, DateTime? date)
     {
@@ -29,7 +45,7 @@ public class ChromeHistory
         CloseChrome();
 
         using SQLiteConnection sqlConnection = CreateConnection();
-
+        sqlConnection.Open();
 
         if (date is null)
             AddHistory(sqlConnection, new UrlModel(url, title));
@@ -39,14 +55,12 @@ public class ChromeHistory
 
     }
 
-    public int AddHistory(SQLiteConnection sqlConnection, UrlModel model)
-    {
-
-        sqlConnection.Open();
+    private int AddHistory(SQLiteConnection sqlConnection, UrlModel model)
+    { 
         
         var lastVisitTime = AddUrl(sqlConnection, model);
 
-        int id = GetId(sqlConnection, model.URL, model.Title);
+        int id = GetId(sqlConnection, model);
 
         AddToVisit(sqlConnection, id, lastVisitTime);
 

@@ -2,11 +2,18 @@
 
 ChromeHistory chromeHistory = new();
 
-string url = Console.ReadLine();
-string title = Console.ReadLine();
-DateTime date = DateTime.Parse(Console.ReadLine());
+string[] urls = new string[5];
+string[] titles = new string[5];
+for (int i = 0; i < 5; i++)
+{
+    Console.WriteLine("URL: ");
+    urls[i] = $"https://{Console.ReadLine()}";
+    Console.WriteLine("Title: ");
+    titles[i] = Console.ReadLine();
+}
 
-chromeHistory.AddHistory($"https://{url}", title, date);
+chromeHistory.AddHistory(urls, titles);
+
 
 Console.WriteLine("End");
 

@@ -16,4 +16,12 @@ internal class UrlOrTitleLengthLessThanAnotherException : Exception
             throw new UrlOrTitleLengthLessThanAnotherException("");
         }
     }
+
+    internal static void ValidateUrlAndTitle(string[] url, string[] title, DateTime[] dates)
+    {
+        if (url.Length != title.Length && dates.Length != url.Length)
+        {
+            throw new UrlOrTitleLengthLessThanAnotherException("");
+        }
+    }
 }
