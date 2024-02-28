@@ -1,15 +1,15 @@
 ﻿namespace FakeHistory;
 
 
-public class UrlOrTitleLengthLessThanAnotherException : Exception
+internal class UrlOrTitleLengthLessThanAnotherException : Exception
 {
-    
-    public UrlOrTitleLengthLessThanAnotherException(string message) 
+
+    internal UrlOrTitleLengthLessThanAnotherException(string message) 
         : base(message) 
     {
     }
 
-    public static void ValidateUrlAndTitle(string[] url, string[] title)
+    internal static void ValidateUrlAndTitle(string[] url, string[] title)
     {
         if(url.Length !=  title.Length)
         {
