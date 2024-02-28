@@ -1,6 +1,6 @@
-﻿using System.Data.SQLite;
+﻿using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Diagnostics;
-using System.Dynamic;
 
 
 namespace FakeHistory;
@@ -12,34 +12,47 @@ public class ChromeHistory
     private static string connectionString = $"Data Source={localAppDataPath}";
 
 
-    public void AddHistory(string[] url, string[] title)
+    /*    public void AddHistory(string[] url, string[] title)
+        {
+            CloseChrome();
+
+            using SQLiteConnection sqlConnection = CreateConnection();
+            sqlConnection.Open();
+
+
+        }*/
+
+
+    public void AddHistory(string url, string title, DateTime? date)
     {
+
         CloseChrome();
 
         using SQLiteConnection sqlConnection = CreateConnection();
-        sqlConnection.Open();
 
+
+        if (date is null)
+            AddHistory(sqlConnection, new UrlModel(url, title));
         
+        else
+            AddHistory(sqlConnection, new UrlModel(url, title, (DateTime)date));
+
     }
 
-
-
-
-    public int AddHistory(string url, string title, DateTime date)
+    public int AddHistory(SQLiteConnection sqlConnection, UrlModel model)
     {
-        CloseChrome();
 
-        using SQLiteConnection sqlConnection = CreateConnection();
         sqlConnection.Open();
+        
+        var lastVisitTime = AddUrl(sqlConnection, model);
 
-        var lastVisitTime = AddUrl(sqlConnection, url, title, date);
-
-        int id = GetId(sqlConnection, url, title);
+        int id = GetId(sqlConnection, model.URL, model.Title);
 
         AddToVisit(sqlConnection, id, lastVisitTime);
 
         return id;
     }
+
 
     private SQLiteConnection CreateConnection()
     {
@@ -47,7 +60,7 @@ public class ChromeHistory
         return sqlConnection;
     }
 
-    private long AddUrl(SQLiteConnection sqlConnection, string url, string title, DateTime date)
+    private long AddUrl(SQLiteConnection sqlConnection, UrlModel model)
     {
         using var addUrl = sqlConnection.CreateCommand();
         addUrl.CommandText = """
@@ -55,10 +68,10 @@ public class ChromeHistory
             VALUES (@url, @title, 32, @lastVisitTime);
             """;
 
-        var lastVisitTime = GetMilliSeconds(date);
+        var lastVisitTime = GetMilliSeconds(model.Date);
 
-        addUrl.Parameters.AddWithValue("url", url);
-        addUrl.Parameters.AddWithValue("title", title);
+        addUrl.Parameters.AddWithValue("url", model.URL);
+        addUrl.Parameters.AddWithValue("title", model.Title);
         addUrl.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
         addUrl.ExecuteNonQuery();
 
@@ -73,12 +86,12 @@ public class ChromeHistory
         return lastVisitTime;
     }
 
-    private int GetId(SQLiteConnection sqlConnection, string url, string title)
+    private int GetId(SQLiteConnection sqlConnection, UrlModel model)
     {
         using var getUrlId = sqlConnection.CreateCommand();
         getUrlId.CommandText = "SELECT id FROM urls WHERE title == @title AND url == @url";
-        getUrlId.Parameters.AddWithValue("title", title);
-        getUrlId.Parameters.AddWithValue("url", url);
+        getUrlId.Parameters.AddWithValue("title", model.Title);
+        getUrlId.Parameters.AddWithValue("url", model.URL);
         using var idReader = getUrlId.ExecuteReader();
         idReader.Read();
         int id = idReader.GetInt32(0);
@@ -106,3 +119,5 @@ public class ChromeHistory
 
 
 }
+
+
