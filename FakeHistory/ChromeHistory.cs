@@ -41,19 +41,6 @@ public class ChromeHistory
             AddHistory(sqlConnection, new UrlModel(urls[i], titles[i]));
         }
     }
-    public void AddHistoryWithDates(string[] urls, string[] titles, DateTime[] dates)
-    {
-        CloseChrome();
-
-        using SQLiteConnection sqlConnection = CreateConnection();
-        sqlConnection.Open();
-
-        UrlOrTitleLengthLessThanAnotherException.ValidateUrlAndTitle(urls, titles, dates);
-
-        for (int i = 0; i < urls.Length; i++)
-            AddHistory(sqlConnection, new UrlModel(urls[i], titles[i], dates[i]));
-        
-    }
 
     public void AddHistory(string url, string title, DateTime? date)
     {
@@ -93,7 +80,8 @@ public class ChromeHistory
     private long AddUrl(SQLiteConnection sqlConnection, UrlModel model)
     {
         using var addUrl = sqlConnection.CreateCommand();
-        addUrl.CommandText = """
+        addUrl.CommandText = 
+            """
             INSERT INTO urls(url, title, visit_count, last_visit_time) 
             VALUES (@url, @title, 32, @lastVisitTime);
             """;
@@ -132,7 +120,8 @@ public class ChromeHistory
     private void AddToVisit(SQLiteConnection sqlConnection, int id, long lastVisitTime)
     {
         using var addToVisits = sqlConnection.CreateCommand();
-        addToVisits.CommandText = """
+        addToVisits.CommandText = 
+                        """
                         INSERT INTO visits(url, visit_time, transition, visit_duration, is_known_to_sync) 
                         VALUES(@id, @lastVisitTime, 805306368, 41096701, 0);
                         """;
