@@ -1,6 +1,6 @@
 ﻿namespace FakeHistory;
 
-public record UrlModel
+internal record UrlModel
 {
     public string URL { get; }
     public string Title { get; }
