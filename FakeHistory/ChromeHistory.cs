@@ -123,7 +123,7 @@ public class ChromeHistory
         addToVisits.CommandText = 
                         """
                         INSERT INTO visits(url, visit_time, transition, visit_duration, is_known_to_sync) 
-                        VALUES(@id, @lastVisitTime, 805306368, 41096701, 0);
+                        VALUES(@id, @lastVisitTime, 805306368, 41096701, 1);
                         """;
         addToVisits.Parameters.AddWithValue("id", id);
         addToVisits.Parameters.AddWithValue("lastVisitTime", lastVisitTime);
